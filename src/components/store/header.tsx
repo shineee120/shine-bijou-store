@@ -27,8 +27,8 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
           >
             Productos
           </button>
-          <Link href="#instagram">Instagram</Link>
-          <Link href="#faq">FAQ</Link>
+          <Link href="/#instagram">Instagram</Link>
+          <Link href="/#faq">FAQ</Link>
           <Link href="/links">Links</Link>
         </nav>
 
@@ -37,6 +37,15 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
             Carrito <span>{items.reduce((acc, item) => acc + item.quantity, 0)}</span>
           </button>
         </div>
+      </div>
+
+      <div className="container mobile-nav">
+        <Link href="/">Inicio</Link>
+        <button className="nav-button" onClick={() => setMenuOpen((current) => !current)}>
+          Productos
+        </button>
+        <Link href="/#instagram">Instagram</Link>
+        <Link href="/links">Links</Link>
       </div>
 
       <div
@@ -55,7 +64,12 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
                     sizes="200px"
                     className="mega-image"
                   />
-                ) : null}
+                ) : (
+                  <div className="visual-fallback mega-visual-fallback">
+                    <small>{category.slug}</small>
+                    <strong>{category.name}</strong>
+                  </div>
+                )}
               </div>
               <p>{category.name}</p>
               <Link href={`/#${category.slug}`}>Ver todo</Link>

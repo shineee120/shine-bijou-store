@@ -27,6 +27,49 @@ function ProductBadges({ product }: { product: Product }) {
   );
 }
 
+function ProductVisual({ product }: { product: Product }) {
+  if (product.images[0]) {
+    return (
+      <Image
+        src={product.images[0]}
+        alt={product.name}
+        fill
+        sizes="(max-width: 960px) 100vw, 33vw"
+        className="product-photo"
+      />
+    );
+  }
+
+  return (
+    <div className="visual-fallback product-visual-fallback">
+      <small>{product.categorySlug}</small>
+      <strong>{product.name}</strong>
+      <span>Shine selection</span>
+    </div>
+  );
+}
+
+function CategoryVisual({ category }: { category: ProductCategory }) {
+  if (category.image) {
+    return (
+      <Image
+        src={category.image}
+        alt={category.name}
+        fill
+        sizes="(max-width: 960px) 100vw, 20vw"
+        className="category-image"
+      />
+    );
+  }
+
+  return (
+    <div className="visual-fallback category-visual-fallback">
+      <small>{category.slug}</small>
+      <strong>{category.name}</strong>
+    </div>
+  );
+}
+
 function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
   const { toggleItem, hasItem } = useWishlist();
@@ -39,7 +82,7 @@ function ProductCard({ product }: { product: Product }) {
     productId: product.id,
     productName: product.name,
     productSlug: product.slug,
-    image: product.images[0],
+    image: product.images[0] ?? "",
     quantity: 1,
     price: product.price,
     variantLabel: defaultVariant,
@@ -50,15 +93,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <article className="product-card" id={product.categorySlug}>
       <div className="product-image product-image-link">
-        {product.images[0] ? (
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            sizes="(max-width: 960px) 100vw, 33vw"
-            className="product-photo"
-          />
-        ) : null}
+        <ProductVisual product={product} />
         <span>{product.categorySlug}</span>
         <button
           type="button"
@@ -75,13 +110,6 @@ function ProductCard({ product }: { product: Product }) {
             <h3>{product.name}</h3>
           </Link>
           <p>{product.description}</p>
-          {product.showTagsOnHome && product.tags?.length ? (
-            <div className="product-meta">
-              {product.tags.slice(0, 3).map((tag) => (
-                <small key={tag}>#{tag}</small>
-              ))}
-            </div>
-          ) : null}
         </div>
         <div className="product-prices">
           <span>{formatCurrency(product.price)}</span>
@@ -102,49 +130,69 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-function HeroRotator({ banners }: { banners: HeroBanner[] }) {
+function HeroRotator({
+  banners,
+  featuredProducts
+}: {
+  banners: HeroBanner[];
+  featuredProducts: Product[];
+}) {
   const [index, setIndex] = useState(0);
   const banner = banners[index] ?? banners[0];
+  const spotlight = featuredProducts.slice(0, 3);
 
   return (
-    <section className="hero">
-      <div className="container editorial-grid">
-        <div className="hero-panel">
-          <p className="eyebrow">Editorial Shine</p>
-          <h1>{banner.title}</h1>
-          <p className="hero-copy">{banner.subtitle}</p>
-          <div className="hero-actions">
-            <Link href={banner.ctaHref} className="button-primary">
-              {banner.ctaLabel}
-            </Link>
-            {banner.secondaryHref && banner.secondaryLabel ? (
-              <Link href={banner.secondaryHref} className="button-secondary">
-                {banner.secondaryLabel}
+    <section className="hero hero-premium">
+      <div className="hero-bleed">
+        <div className="container hero-premium-grid">
+          <div className="hero-premium-copy">
+            <p className="eyebrow">Shine</p>
+            <h1>{banner.title}</h1>
+            <p className="hero-copy">{banner.subtitle}</p>
+            <div className="hero-actions">
+              <Link href={banner.ctaHref} className="button-primary">
+                {banner.ctaLabel}
               </Link>
-            ) : null}
+              {banner.secondaryHref && banner.secondaryLabel ? (
+                <Link href={banner.secondaryHref} className="button-secondary">
+                  {banner.secondaryLabel}
+                </Link>
+              ) : null}
+            </div>
+            <div className="hero-switches">
+              {banners.map((entry, currentIndex) => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className={currentIndex === index ? "active" : ""}
+                  onClick={() => setIndex(currentIndex)}
+                >
+                  0{currentIndex + 1}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="hero-switches">
-            {banners.map((entry, currentIndex) => (
-              <button
-                key={entry.id}
-                className={currentIndex === index ? "active" : ""}
-                onClick={() => setIndex(currentIndex)}
-              >
-                0{currentIndex + 1}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        <div className="lookbook-panel">
-          <div className="lookbook-card tall">
-            <span>Joyeria cotidiana</span>
-          </div>
-          <div className="lookbook-card">
-            <span>Sets para regalo</span>
-          </div>
-          <div className="lookbook-card">
-            <span>Nuevos ingresos</span>
+          <div className="hero-editorial-panel">
+            <div className="hero-editorial-lead">
+              <span>Drop actual</span>
+              <p>Joyeria minimalista para todos los dias, regalos y nuevos ingresos.</p>
+            </div>
+            <div className="hero-spotlight-list">
+              {spotlight.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.slug}`}
+                  className="hero-spotlight-item"
+                >
+                  <div>
+                    <strong>{product.name}</strong>
+                    <small>{product.categorySlug}</small>
+                  </div>
+                  <span>{formatCurrency(product.price)}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -152,35 +200,69 @@ function HeroRotator({ banners }: { banners: HeroBanner[] }) {
   );
 }
 
+function SupportRail() {
+  return (
+    <section className="section support-rail-section">
+      <div className="container support-rail">
+        <div>
+          <p className="eyebrow">Shine studio</p>
+          <strong>Curaduria de piezas para looks cotidianos, regalo y salida.</strong>
+        </div>
+        <div className="support-points">
+          <span>Catalogo con carrito persistente</span>
+          <span>Pedido por WhatsApp o Mercado Pago</span>
+          <span>Envios y retiro coordinado</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FeaturedCollections({ products }: { products: Product[] }) {
-  const featured = products.filter((product) => product.featured);
-  const newArrivals = products.filter((product) => product.newArrival);
+  const featured = products.filter((product) => product.featured).slice(0, 4);
+  const newArrivals = products.filter((product) => product.newArrival).slice(0, 4);
+  const spotlight = featured[0] ?? products[0];
 
   return (
     <section className="section subtle-section" id="destacados">
-      <div className="container editorial-split">
-        <div>
+      <div className="container editorial-feature-grid">
+        <div className="editorial-feature-copy">
           <p className="eyebrow">Destacados</p>
-          <h2>Favoritos de la semana</h2>
-          <div className="mini-list">
-            {featured.map((product) => (
-              <Link key={product.id} href={`/products/${product.slug}`} className="mini-product">
-                <span>{product.name}</span>
-                <small>{formatCurrency(product.price)}</small>
-              </Link>
-            ))}
-          </div>
+          <h2>Piezas para usar ahora y volver a comprar despues</h2>
+          <p className="section-copy">
+            Una seleccion pensada para clientas que buscan algo facil de combinar,
+            delicado y listo para regalar.
+          </p>
+          {spotlight ? (
+            <Link href={`/products/${spotlight.slug}`} className="editorial-feature-link">
+              <span>{spotlight.name}</span>
+              <strong>{formatCurrency(spotlight.price)}</strong>
+            </Link>
+          ) : null}
         </div>
-        <div id="nuevos">
-          <p className="eyebrow">Nuevos ingresos</p>
-          <h2>Recien llegados</h2>
-          <div className="mini-list">
-            {newArrivals.map((product) => (
-              <Link key={product.id} href={`/products/${product.slug}`} className="mini-product">
-                <span>{product.name}</span>
-                <small>{formatCurrency(product.price)}</small>
-              </Link>
-            ))}
+
+        <div className="editorial-feature-columns">
+          <div>
+            <p className="eyebrow">Favoritos</p>
+            <div className="mini-list">
+              {featured.map((product) => (
+                <Link key={product.id} href={`/products/${product.slug}`} className="mini-product">
+                  <span>{product.name}</span>
+                  <small>{formatCurrency(product.price)}</small>
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div id="nuevos">
+            <p className="eyebrow">Nuevos ingresos</p>
+            <div className="mini-list">
+              {newArrivals.map((product) => (
+                <Link key={product.id} href={`/products/${product.slug}`} className="mini-product">
+                  <span>{product.name}</span>
+                  <small>{formatCurrency(product.price)}</small>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -195,27 +277,19 @@ function CategoryMenu({ categories }: { categories: ProductCategory[] }) {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Categorias</p>
-            <h2>Explora por estilo</h2>
+            <h2>Explora la tienda por familia de producto</h2>
           </div>
           <p className="section-copy">
-            Cuadrados rapidos, pensados para navegar como catalogo y tambien para tu
-            pagina `/links`.
+            Cuadros rapidos para navegar, compartir por WhatsApp y descubrir nuevas
+            combinaciones.
           </p>
         </div>
         <div className="category-grid">
           {categories.map((category) => (
             <Link key={category.id} href={`/#${category.slug}`} className="category-card">
-              {category.image ? (
-                <div className="category-image-wrap">
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    sizes="(max-width: 960px) 100vw, 20vw"
-                    className="category-image"
-                  />
-                </div>
-              ) : null}
+              <div className="category-image-wrap">
+                <CategoryVisual category={category} />
+              </div>
               <span>{category.name}</span>
               <small>{category.description}</small>
               <strong>{category.linkLabel ?? "Ver todo"}</strong>
@@ -296,6 +370,61 @@ function Catalog({
   );
 }
 
+function StorySection() {
+  return (
+    <section className="section subtle-section" id="sobre">
+      <div className="container story-grid">
+        <div>
+          <p className="eyebrow">Sobre Shine</p>
+          <h2>Una tienda pensada para elegir facil y regalar mejor</h2>
+        </div>
+        <div className="story-copy">
+          <p>
+            Shine mezcla accesorios cotidianos, sets delicados y detalles que
+            levantan un look sin complicarlo.
+          </p>
+          <p>
+            La idea es que entrar a la tienda se sienta rapido, claro y visual: ver,
+            elegir, sumar al carrito o mandar el pedido por WhatsApp.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HowToBuySection() {
+  const steps = [
+    "Elegis productos, variantes y cantidades.",
+    "Calculas envio, aplicas cupon si corresponde y revisas total.",
+    "Pagas por Mercado Pago o mandas el pedido completo por WhatsApp."
+  ];
+
+  return (
+    <section className="section" id="como-comprar">
+      <div className="container">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Como comprar</p>
+            <h2>Un recorrido corto para comprar sin vueltas</h2>
+          </div>
+          <Link href={`https://wa.me/${siteConfig.whatsappNumber}`} className="button-secondary">
+            Consultar por WhatsApp
+          </Link>
+        </div>
+        <div className="process-grid">
+          {steps.map((step, index) => (
+            <article key={step} className="process-step">
+              <strong>0{index + 1}</strong>
+              <p>{step}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ReviewStrip({ products }: { products: Product[] }) {
   const reviews = products.flatMap((product) =>
     (product.reviews ?? []).map((review) => ({
@@ -309,7 +438,7 @@ function ReviewStrip({ products }: { products: Product[] }) {
       <div className="container">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Reseñas</p>
+            <p className="eyebrow">Resenas</p>
             <h2>Lo que dicen las clientas</h2>
           </div>
         </div>
@@ -317,7 +446,7 @@ function ReviewStrip({ products }: { products: Product[] }) {
           {reviews.map((review) => (
             <article key={review.id} className="review-card">
               <strong>{review.author}</strong>
-              <span>{"★".repeat(review.rating)}</span>
+              <span>{"*".repeat(review.rating)}</span>
               <p>{review.comment}</p>
               <small>{review.productName}</small>
             </article>
@@ -335,7 +464,7 @@ function InstagramLookbook() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Instagram</p>
-            <h2>Inspiracion visual y lanzamientos</h2>
+            <h2>Lookbook, nuevos ingresos y regalos</h2>
           </div>
           <Link href={siteConfig.instagramUrl} className="button-secondary">
             Abrir perfil
@@ -344,7 +473,7 @@ function InstagramLookbook() {
         <div className="instagram-grid">
           <div className="instagram-tile large">Drop semanal</div>
           <div className="instagram-tile">Mix de aros</div>
-          <div className="instagram-tile">Regalos</div>
+          <div className="instagram-tile">Regalos listos</div>
           <div className="instagram-tile">Collares en capas</div>
         </div>
       </div>
@@ -390,6 +519,27 @@ function CouponStrip({ coupons }: { coupons: Coupon[] }) {
   );
 }
 
+function FinalCTA() {
+  return (
+    <section className="section final-cta-section">
+      <div className="container final-cta">
+        <div>
+          <p className="eyebrow">Contacto</p>
+          <h2>Lista para elegir, comprar o pedir ayuda con el regalo</h2>
+        </div>
+        <div className="final-cta-actions">
+          <Link href="#productos" className="button-primary">
+            Ver catalogo
+          </Link>
+          <Link href={`https://wa.me/${siteConfig.whatsappNumber}`} className="button-secondary">
+            Ir a WhatsApp
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function HomeShell({
   banners,
   categories,
@@ -403,16 +553,22 @@ export function HomeShell({
   faqItems: FAQItem[];
   products: Product[];
 }) {
+  const featuredProducts = products.filter((product) => product.featured || product.newArrival);
+
   return (
     <>
-      <HeroRotator banners={banners} />
+      <HeroRotator banners={banners} featuredProducts={featuredProducts} />
+      <SupportRail />
       <CouponStrip coupons={coupons} />
       <CategoryMenu categories={categories} />
       <FeaturedCollections products={products} />
       <Catalog categories={categories} products={products} />
+      <StorySection />
+      <HowToBuySection />
       <ReviewStrip products={products} />
       <InstagramLookbook />
       <FAQSection items={faqItems} />
+      <FinalCTA />
     </>
   );
 }

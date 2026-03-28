@@ -30,8 +30,10 @@ export default async function AdminDashboardPage() {
   const {
     data: { session }
   } = await supabase.auth.getSession();
+  const adminEmail = (process.env.ADMIN_BOOTSTRAP_EMAIL ?? "admin@shinebijou.com").toLowerCase();
+  const sessionEmail = session?.user?.email?.toLowerCase();
 
-  if (!session) {
+  if (!session || sessionEmail !== adminEmail) {
     redirect("/admin/login");
   }
 

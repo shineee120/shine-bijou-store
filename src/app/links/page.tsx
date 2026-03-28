@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/lib/site-config";
 import { getStorefrontData } from "@/lib/store-service";
+
+export const metadata: Metadata = {
+  title: "Links",
+  description: "Acceso rapido a categorias de Shine Bijou para compartir por WhatsApp.",
+  alternates: {
+    canonical: `${siteConfig.siteUrl}/links`
+  }
+};
 
 export default async function LinksPage() {
   const { categories } = await getStorefrontData();
