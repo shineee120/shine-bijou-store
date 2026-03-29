@@ -46,11 +46,15 @@ export function DashboardShell({
   const [editingBannerId, setEditingBannerId] = useState<string | null>(null);
   const [editingFaqId, setEditingFaqId] = useState<string | null>(null);
   const [editingCouponId, setEditingCouponId] = useState<string | null>(null);
+  const [productSearch, setProductSearch] = useState("");
+  const [orderSearch, setOrderSearch] = useState("");
+  const [contentSearch, setContentSearch] = useState("");
 
   const lowStock = products.filter((product) => product.stock <= 5);
   const featuredCount = products.filter((product) => product.featured).length;
   const newArrivalCount = products.filter((product) => product.newArrival).length;
   const totalRevenue = orders.reduce((acc, order) => acc + order.total, 0);
+  const pendingOrders = orders.filter((order) => order.status === "pending").length;
 
   const stats = useMemo(
     () => [
@@ -69,6 +73,78 @@ export function DashboardShell({
   const editingFaq = faqList.find((item) => item.id === editingFaqId) ?? null;
   const editingCoupon =
     couponList.find((coupon) => coupon.id === editingCouponId) ?? null;
+
+  const filteredProducts = useMemo(() => {
+    const term = productSearch.toLowerCase().trim();
+    if (!term) {
+      return products;
+    }
+
+    return products.filter((product) =>
+      [product.name, product.categorySlug, product.sku ?? "", ...(product.tags ?? [])]
+        .join(" ")
+        .toLowerCase()
+        .includes(term)
+    );
+  }, [productSearch, products]);
+
+  const filteredOrders = useMemo(() => {
+    const term = orderSearch.toLowerCase().trim();
+    if (!term) {
+      return orders;
+    }
+
+    return orders.filter((order) =>
+      [order.clientName, order.channel, order.status, order.notes ?? ""]
+        .join(" ")
+        .toLowerCase()
+        .includes(term)
+    );
+  }, [orderSearch, orders]);
+
+  const filteredCategories = useMemo(() => {
+    const term = contentSearch.toLowerCase().trim();
+    if (!term) {
+      return categories;
+    }
+
+    return categories.filter((category) =>
+      [category.name, category.slug, category.description].join(" ").toLowerCase().includes(term)
+    );
+  }, [categories, contentSearch]);
+
+  const filteredFaqs = useMemo(() => {
+    const term = contentSearch.toLowerCase().trim();
+    if (!term) {
+      return faqList;
+    }
+
+    return faqList.filter((item) =>
+      [item.question, item.answer].join(" ").toLowerCase().includes(term)
+    );
+  }, [contentSearch, faqList]);
+
+  const filteredBanners = useMemo(() => {
+    const term = contentSearch.toLowerCase().trim();
+    if (!term) {
+      return banners;
+    }
+
+    return banners.filter((banner) =>
+      [banner.title, banner.subtitle, banner.ctaLabel].join(" ").toLowerCase().includes(term)
+    );
+  }, [banners, contentSearch]);
+
+  const filteredCoupons = useMemo(() => {
+    const term = contentSearch.toLowerCase().trim();
+    if (!term) {
+      return couponList;
+    }
+
+    return couponList.filter((coupon) =>
+      [coupon.code, coupon.description].join(" ").toLowerCase().includes(term)
+    );
+  }, [contentSearch, couponList]);
 
   async function uploadImage(file: File) {
     const path = `products/${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
@@ -192,6 +268,64 @@ export function DashboardShell({
     setMessage("Producto eliminado.");
   }
 
+  async function duplicateProduct(product: Product) {
+    setSaving("duplicate");
+    setMessage(null);
+
+    const payload = {
+      name: `${product.name} copia`,
+      slug: `${slugify(product.name)}-copy-${Date.now().toString().slice(-4)}`,
+      description: product.description,
+      long_description: product.longDescription ?? "",
+      price: product.price,
+      compare_at_price: product.compareAtPrice ?? null,
+      stock: product.stock,
+      category_slug: product.categorySlug,
+      featured: false,
+      new_arrival: product.newArrival ?? false,
+      best_seller: product.bestSeller ?? false,
+      show_tags_on_home: product.showTagsOnHome ?? false,
+      sku: product.sku ? `${product.sku}-COPY` : "",
+      variants: product.variants ?? [],
+      tags: product.tags ?? [],
+      weight_grams: product.weightGrams ?? 0,
+      images: product.images ?? []
+    };
+
+    const { data, error } = await supabase.from("products").insert(payload).select().single();
+    if (error) {
+      setMessage(error.message);
+      setSaving(null);
+      return;
+    }
+
+    setProducts((current) => [
+      {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description ?? "",
+        longDescription: data.long_description ?? "",
+        price: data.price,
+        compareAtPrice: data.compare_at_price,
+        stock: data.stock ?? 0,
+        categorySlug: data.category_slug,
+        featured: data.featured ?? false,
+        newArrival: data.new_arrival ?? false,
+        bestSeller: data.best_seller ?? false,
+        showTagsOnHome: data.show_tags_on_home ?? false,
+        images: data.images ?? [],
+        variants: data.variants ?? [],
+        tags: data.tags ?? [],
+        sku: data.sku ?? "",
+        weightGrams: data.weight_grams ?? 0
+      },
+      ...current
+    ]);
+    setSaving(null);
+    setMessage("Producto duplicado.");
+  }
+
   async function createCategory(formData: FormData) {
     setSaving("category");
     setMessage(null);
@@ -295,6 +429,26 @@ export function DashboardShell({
     ]);
     setMessage("Pedido guardado.");
     setSaving(null);
+  }
+
+  async function updateOrderStatus(order: AdminTaskOrder, status: AdminTaskOrder["status"]) {
+    setSaving(`order-${order.id}`);
+    setMessage(null);
+
+    const table = order.channel === "manual" ? "manual_orders" : "checkout_orders";
+    const { error } = await supabase.from(table).update({ status }).eq("id", order.id);
+
+    if (error) {
+      setMessage(error.message);
+      setSaving(null);
+      return;
+    }
+
+    setOrders((current) =>
+      current.map((entry) => (entry.id === order.id ? { ...entry, status } : entry))
+    );
+    setSaving(null);
+    setMessage("Estado del pedido actualizado.");
   }
 
   async function saveFaq(formData: FormData) {
@@ -449,7 +603,31 @@ export function DashboardShell({
   }
 
   return (
-    <div className="admin-shell">
+    <div className="admin-shell admin-shell-polished">
+      <section className="admin-hero-panel">
+        <div>
+          <p className="eyebrow">Panel privado</p>
+          <h2>Gestion diaria de Shine</h2>
+          <p className="admin-hero-copy">
+            Una vista mas clara para productos, contenido, pedidos y acciones rapidas.
+          </p>
+        </div>
+        <div className="admin-quick-grid">
+          <button className="admin-quick-card" onClick={() => setActiveTab("products")}>
+            <strong>Agregar producto</strong>
+            <span>Cargar novedades, stock y variantes</span>
+          </button>
+          <button className="admin-quick-card" onClick={() => setActiveTab("orders")}>
+            <strong>Revisar pedidos</strong>
+            <span>Seguir WhatsApp, Mercado Pago y manuales</span>
+          </button>
+          <button className="admin-quick-card" onClick={() => setActiveTab("content")}>
+            <strong>Editar contenido</strong>
+            <span>Banners, FAQs y promociones</span>
+          </button>
+        </div>
+      </section>
+
       <div className="admin-tabs">
         <button className={activeTab === "overview" ? "active" : ""} onClick={() => setActiveTab("overview")}>
           Resumen
@@ -465,11 +643,20 @@ export function DashboardShell({
         </button>
       </div>
 
-      <section className="admin-overview">
+      <section className="admin-overview admin-overview-grid">
         {stats.map((stat) => (
           <div key={stat.label} className="admin-stat">
             <span>{stat.label}</span>
             <strong>{stat.value}</strong>
+            <small>
+              {stat.label === "Pedidos"
+                ? `${pendingOrders} pendientes`
+                : stat.label === "Productos"
+                  ? `${featuredCount} destacados`
+                  : stat.label === "Categorias"
+                    ? "Navegacion activa"
+                    : "Total historico"}
+            </small>
           </div>
         ))}
       </section>
@@ -602,9 +789,20 @@ export function DashboardShell({
             </form>
 
             <div className="admin-panel-card">
-              <h2>Productos actuales</h2>
+              <div className="admin-section-header">
+                <div>
+                  <p className="eyebrow">Catalogo</p>
+                  <h2>Productos actuales</h2>
+                </div>
+              </div>
+              <input
+                className="admin-search"
+                placeholder="Buscar por nombre, categoria, SKU o tag"
+                value={productSearch}
+                onChange={(event) => setProductSearch(event.target.value)}
+              />
               <div className="admin-table compact">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <div key={product.id} className="admin-row">
                     <div>
                       <strong>{product.name}</strong>
@@ -612,6 +810,7 @@ export function DashboardShell({
                     </div>
                     <div className="inline-row">
                       <button className="ghost-button" type="button" onClick={() => setEditingProductId(product.id)}>Editar</button>
+                      <button className="ghost-button" type="button" onClick={() => void duplicateProduct(product)}>Duplicar</button>
                       <button className="ghost-button" type="button" onClick={() => void deleteProduct(product.id)}>Eliminar</button>
                     </div>
                   </div>
@@ -620,9 +819,14 @@ export function DashboardShell({
             </div>
 
             <div className="admin-panel-card">
-              <h2>Categorias actuales</h2>
+              <div className="admin-section-header">
+                <div>
+                  <p className="eyebrow">Categorias</p>
+                  <h2>Categorias actuales</h2>
+                </div>
+              </div>
               <div className="admin-table compact">
-                {categories.map((category) => (
+                {filteredCategories.map((category) => (
                   <div key={category.id} className="admin-row">
                     <div>
                       <strong>{category.name}</strong>
@@ -701,9 +905,23 @@ export function DashboardShell({
 
           <div className="admin-stack">
             <div className="admin-panel-card">
+              <div className="admin-section-header">
+                <div>
+                  <p className="eyebrow">Buscador</p>
+                  <h2>Encontrar contenido rapido</h2>
+                </div>
+              </div>
+              <input
+                className="admin-search"
+                placeholder="Buscar banners, FAQs, cupones o categorias"
+                value={contentSearch}
+                onChange={(event) => setContentSearch(event.target.value)}
+              />
+            </div>
+            <div className="admin-panel-card">
               <h2>Banners actuales</h2>
               <div className="admin-table compact">
-                {banners.map((banner) => (
+                {filteredBanners.map((banner) => (
                   <div key={banner.id} className="admin-row">
                     <div>
                       <strong>{banner.title}</strong>
@@ -720,7 +938,7 @@ export function DashboardShell({
             <div className="admin-panel-card">
               <h2>FAQ actuales</h2>
               <div className="admin-table compact">
-                {faqList.map((item) => (
+                {filteredFaqs.map((item) => (
                   <div key={item.id} className="admin-row">
                     <div>
                       <strong>{item.question}</strong>
@@ -737,7 +955,7 @@ export function DashboardShell({
             <div className="admin-panel-card">
               <h2>Cupones activos</h2>
               <div className="admin-table compact">
-                {couponList.map((coupon) => (
+                {filteredCoupons.map((coupon) => (
                   <div key={coupon.id} className="admin-row">
                     <div>
                       <strong>{coupon.code}</strong>
@@ -793,16 +1011,37 @@ export function DashboardShell({
                 <h2>WhatsApp, Mercado Pago y manuales</h2>
               </div>
             </div>
+            <input
+              className="admin-search"
+              placeholder="Buscar por cliente, canal, estado o nota"
+              value={orderSearch}
+              onChange={(event) => setOrderSearch(event.target.value)}
+            />
             <div className="admin-table compact">
-              {orders.map((order) => (
+              {filteredOrders.map((order) => (
                 <div key={order.id} className="admin-row">
                   <div>
                     <strong>{order.clientName}</strong>
                     <span>
                       {order.status} - {order.channel} - {new Date(order.createdAt).toLocaleDateString("es-AR")}
                     </span>
+                    {order.notes ? <small>{order.notes}</small> : null}
                   </div>
-                  <strong>{formatCurrency(order.total)}</strong>
+                  <div className="admin-inline-actions">
+                    <strong>{formatCurrency(order.total)}</strong>
+                    <button className="ghost-button" type="button" disabled={saving === `order-${order.id}`} onClick={() => void updateOrderStatus(order, "pending")}>
+                      Pendiente
+                    </button>
+                    <button className="ghost-button" type="button" disabled={saving === `order-${order.id}`} onClick={() => void updateOrderStatus(order, "paid")}>
+                      Pagado
+                    </button>
+                    <button className="ghost-button" type="button" disabled={saving === `order-${order.id}`} onClick={() => void updateOrderStatus(order, "preparing")}>
+                      Preparando
+                    </button>
+                    <button className="ghost-button" type="button" disabled={saving === `order-${order.id}`} onClick={() => void updateOrderStatus(order, "delivered")}>
+                      Entregado
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
