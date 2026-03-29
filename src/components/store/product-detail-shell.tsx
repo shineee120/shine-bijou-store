@@ -23,7 +23,7 @@ function ProductGallery({ product, selectedImage }: { product: Product; selected
 
   return (
     <div className="visual-fallback detail-visual-fallback">
-      <span>Producto listo para foto real</span>
+      <span>Vista principal</span>
     </div>
   );
 }
@@ -136,11 +136,11 @@ export function ProductDetailShell({
                 </div>
                 <div>
                   <strong>Envio</strong>
-                  <span>Calculalo en el carrito con tu codigo postal</span>
+                  <span>Coordinamos el envio cuando nos envias el pedido</span>
                 </div>
                 <div>
-                  <strong>Canal</strong>
-                  <span>Mercado Pago o pedido por WhatsApp</span>
+                  <strong>Compra</strong>
+                  <span>Agregalo al carrito y envianos la lista por WhatsApp</span>
                 </div>
               </div>
 
@@ -202,7 +202,7 @@ export function ProductDetailShell({
             <div className="detail-support-panel">
               <div>
                 <strong>Ideal para</strong>
-                <p>Regalo, uso diario, combinaciones delicadas y looks faciles de repetir.</p>
+                <p>Uso diario, regalos y combinaciones delicadas para todos los dias.</p>
               </div>
               {product.tags?.length ? (
                 <div className="tag-row">
@@ -236,12 +236,12 @@ export function ProductDetailShell({
         ) : null}
 
         <section className="section">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Relacionados</p>
-              <h2>Tambien te puede gustar</h2>
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Relacionados</p>
+                <h2>Mas para sumar a tu carrito</h2>
+              </div>
             </div>
-          </div>
           <div className="product-grid">
             {relatedProducts.map((related) => (
               <Link key={related.id} href={`/products/${related.slug}`} className="related-card">

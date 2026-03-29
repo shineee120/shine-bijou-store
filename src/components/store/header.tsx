@@ -28,7 +28,7 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
             onMouseEnter={() => setMenuOpen(true)}
             onClick={() => setMenuOpen((current) => !current)}
           >
-            Productos
+            Categorias
           </button>
           <Link href="/#instagram">Instagram</Link>
           <Link href="/#faq">FAQ</Link>
@@ -45,9 +45,10 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
       <div className="container mobile-nav">
         <Link href="/">Inicio</Link>
         <button className="nav-button" onClick={() => setMenuOpen((current) => !current)}>
-          Productos
+          Categorias
         </button>
         <Link href="/#instagram">Instagram</Link>
+        <Link href="/#faq">FAQ</Link>
         <Link href="/links">Links</Link>
       </div>
 
@@ -72,8 +73,8 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
                 )}
               </div>
               <p>{category.name}</p>
-              <Link href={`/#${category.slug}`}>Ver todo</Link>
               <span>{category.description}</span>
+              <Link href={`/#${category.slug}`}>Ver categoria</Link>
             </div>
           ))}
         </div>

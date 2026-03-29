@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   CartItem,
-  Coupon,
   FAQItem,
   HeroBanner,
   Product,
@@ -109,8 +108,8 @@ function StoreProductCard({ product }: { product: Product }) {
               <small>{formatCurrency(product.compareAtPrice)}</small>
             ) : null}
           </div>
-          <button className="button-primary" onClick={() => addItem(item)}>
-            Agregar
+          <button className="button-primary store-add-button" onClick={() => addItem(item)}>
+            Agregar al carrito
           </button>
         </div>
       </div>
@@ -131,13 +130,11 @@ function HeroSection({ banners }: { banners: HeroBanner[] }) {
           <p className="store-hero-text">{banner.subtitle}</p>
           <div className="store-hero-actions">
             <Link href={banner.ctaHref} className="button-primary">
-              {banner.ctaLabel}
+              Ver catalogo
             </Link>
-            {banner.secondaryHref && banner.secondaryLabel ? (
-              <Link href={banner.secondaryHref} className="button-secondary">
-                {banner.secondaryLabel}
-              </Link>
-            ) : null}
+            <Link href={`https://wa.me/${siteConfig.whatsappNumber}`} className="button-secondary">
+              Hablar por WhatsApp
+            </Link>
           </div>
           {banners.length > 1 ? (
             <div className="store-hero-switches">
@@ -275,11 +272,11 @@ function TrustSection() {
   const items = [
     {
       title: "Compra simple",
-      copy: "Mercado Pago, WhatsApp y carrito siempre disponible."
+      copy: "Arma tu carrito y envia el pedido directo por WhatsApp."
     },
     {
-      title: "Envios y retiro",
-      copy: "Calcula envio con tu codigo postal y coordina tu entrega."
+      title: "Atencion cercana",
+      copy: "Resolvemos dudas, variantes y stock por mensaje en pocos pasos."
     },
     {
       title: "Piezas para todos los dias",
@@ -414,7 +411,7 @@ export function HomeShell({
 }: {
   banners: HeroBanner[];
   categories: ProductCategory[];
-  coupons?: Coupon[];
+  coupons?: unknown[];
   faqItems: FAQItem[];
   products: Product[];
 }) {
