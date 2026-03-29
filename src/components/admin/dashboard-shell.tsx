@@ -22,7 +22,7 @@ type DashboardProps = {
   coupons: Coupon[];
 };
 
-type AdminTab = "overview" | "products" | "content" | "orders";
+type AdminTab = "overview" | "products" | "content" | "orders" | "pos";
 
 export function DashboardShell({
   products: initialProducts,
@@ -127,11 +127,12 @@ export function DashboardShell({
 
   const filteredBanners = useMemo(() => {
     const term = contentSearch.toLowerCase().trim();
+    const activeBanners = banners.filter((banner) => banner.active !== false);
     if (!term) {
-      return banners;
+      return activeBanners;
     }
 
-    return banners.filter((banner) =>
+    return activeBanners.filter((banner) =>
       [banner.title, banner.subtitle, banner.ctaLabel].join(" ").toLowerCase().includes(term)
     );
   }, [banners, contentSearch]);
@@ -536,14 +537,28 @@ export function DashboardShell({
   }
 
   async function deleteBanner(id: string) {
+    setSaving(`banner-${id}`);
+    setMessage(null);
+
     const { error } = await supabase.from("home_banners").delete().eq("id", id);
+
     if (error) {
-      setMessage(error.message);
-      return;
+      const { error: archiveError } = await supabase
+        .from("home_banners")
+        .update({ active: false })
+        .eq("id", id);
+
+      if (archiveError) {
+        setMessage(archiveError.message);
+        setSaving(null);
+        return;
+      }
     }
+
     setBanners((current) => current.filter((banner) => banner.id !== id));
     if (editingBannerId === id) setEditingBannerId(null);
     setMessage("Banner eliminado.");
+    setSaving(null);
   }
 
   async function saveCoupon(formData: FormData) {
@@ -653,6 +668,13 @@ export function DashboardShell({
             <strong>Pedidos</strong>
             <span>{orders.length} registros</span>
           </button>
+          <button
+            className={activeTab === "pos" ? "active" : ""}
+            onClick={() => setActiveTab("pos")}
+          >
+            <strong>Punto de venta</strong>
+            <span>Cobros rapidos y carrito local</span>
+          </button>
         </nav>
 
         <div className="admin-sidebar-meta">
@@ -685,6 +707,10 @@ export function DashboardShell({
             <strong>Revisar pedidos</strong>
             <span>Seguir WhatsApp y registros manuales</span>
           </button>
+          <button className="admin-quick-card" onClick={() => setActiveTab("pos")}>
+            <strong>Abrir punto de venta</strong>
+            <span>Modo mostrador inspirado en Tiendanube</span>
+          </button>
           <button className="admin-quick-card" onClick={() => setActiveTab("content")}>
             <strong>Editar contenido</strong>
             <span>Banners, FAQs y promociones</span>
@@ -704,6 +730,9 @@ export function DashboardShell({
         </button>
         <button className={activeTab === "orders" ? "active" : ""} onClick={() => setActiveTab("orders")}>
           Pedidos
+        </button>
+        <button className={activeTab === "pos" ? "active" : ""} onClick={() => setActiveTab("pos")}>
+          Punto de venta
         </button>
       </div>
 
@@ -1200,6 +1229,70 @@ export function DashboardShell({
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+      ) : null}
+
+      {activeTab === "pos" ? (
+        <section className="admin-pos-layout">
+          <div className="admin-pos-hero">
+            <div className="admin-pos-copy">
+              <p className="eyebrow">Punto de venta</p>
+              <h2>Vende en tu local con una experiencia rapida y clara</h2>
+              <p>
+                Usa este espacio como base para caja, ventas rapidas, productos del dia
+                y pedidos presenciales. Todo sigue dentro del mismo panel.
+              </p>
+              <button className="button-primary" type="button" onClick={() => setActiveTab("products")}>
+                Cargar productos para vender
+              </button>
+            </div>
+            <div className="admin-pos-preview">
+              <div className="admin-pos-mock">
+                <div className="admin-pos-column">
+                  <strong>Buscar productos</strong>
+                  <input placeholder="Nombre o SKU" />
+                  <div className="admin-pos-grid">
+                    <button type="button">Agregar cliente</button>
+                    <button type="button">Aplicar descuento</button>
+                    <button type="button">Agregar nota</button>
+                    <button type="button">Crear producto</button>
+                  </div>
+                </div>
+                <div className="admin-pos-column cart">
+                  <strong>Carrito</strong>
+                  {products.slice(0, 3).map((product) => (
+                    <div key={product.id} className="admin-pos-line">
+                      <span>{product.name}</span>
+                      <small>{formatCurrency(product.price)}</small>
+                    </div>
+                  ))}
+                  <div className="admin-pos-total">
+                    <span>Total</span>
+                    <strong>
+                      {formatCurrency(
+                        products.slice(0, 3).reduce((acc, product) => acc + product.price, 0)
+                      )}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-pos-benefits">
+            <article>
+              <strong>1. Catalogo actualizado</strong>
+              <p>Los productos y el stock del panel pueden servir como base para ventas rapidas.</p>
+            </article>
+            <article>
+              <strong>2. Cobro simple</strong>
+              <p>Ideal para usar como referencia interna mientras definimos un flujo de caja mas completo.</p>
+            </article>
+            <article>
+              <strong>3. Un mismo panel</strong>
+              <p>Productos, pedidos y atencion quedan organizados dentro del mismo admin.</p>
+            </article>
           </div>
         </section>
       ) : null}
