@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrency, slugify } from "@/lib/utils";
@@ -852,9 +853,25 @@ export function DashboardShell({
               <div className="admin-table compact">
                 {filteredCategories.map((category) => (
                   <div key={category.id} className="admin-row">
-                    <div>
-                      <strong>{category.name}</strong>
-                      <span>/{category.slug}</span>
+                    <div className="admin-row-with-media">
+                      <div className="admin-thumb">
+                        {category.image ? (
+                          <Image
+                            src={category.image}
+                            alt={category.name}
+                            fill
+                            sizes="72px"
+                            className="thumb-photo"
+                          />
+                        ) : (
+                          <div className="admin-thumb-fallback">Sin foto</div>
+                        )}
+                      </div>
+                      <div>
+                        <strong>{category.name}</strong>
+                        <span>/{category.slug}</span>
+                        {category.linkLabel ? <span>{category.linkLabel}</span> : null}
+                      </div>
                     </div>
                     <div className="inline-row">
                       <button className="ghost-button" type="button" onClick={() => setEditingCategoryId(category.id)}>Editar</button>
