@@ -9,6 +9,7 @@ import { useCart } from "@/components/store/cart-context";
 
 export function Header({ categories }: { categories: ProductCategory[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const { items, openCart } = useCart();
 
   return (
@@ -36,20 +37,16 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
         </nav>
 
         <div className="header-actions">
+          <button
+            className="mobile-menu-toggle"
+            onClick={() => setMobileSidebarOpen((current) => !current)}
+          >
+            Menu
+          </button>
           <button className="cart-button store-cart-button" onClick={openCart}>
             Carrito <span>{items.reduce((acc, item) => acc + item.quantity, 0)}</span>
           </button>
         </div>
-      </div>
-
-      <div className="container mobile-nav">
-        <Link href="/">Inicio</Link>
-        <button className="nav-button" onClick={() => setMenuOpen((current) => !current)}>
-          Categorias
-        </button>
-        <Link href="/#instagram">Instagram</Link>
-        <Link href="/#faq">FAQ</Link>
-        <Link href="/links">Links</Link>
       </div>
 
       <div
@@ -79,6 +76,55 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
           ))}
         </div>
       </div>
+
+      <div
+        className={`mobile-sidebar-overlay ${mobileSidebarOpen ? "open" : ""}`}
+        onClick={() => setMobileSidebarOpen(false)}
+      />
+      <aside className={`mobile-sidebar ${mobileSidebarOpen ? "open" : ""}`}>
+        <div className="mobile-sidebar-header">
+          <div className="store-brand-block">
+            <Link href="/" className="brand store-wordmark" onClick={() => setMobileSidebarOpen(false)}>
+              {siteConfig.shortName}
+            </Link>
+            <span className="store-brand-tag">bijou & accesorios</span>
+          </div>
+          <button className="cart-close" onClick={() => setMobileSidebarOpen(false)}>
+            ×
+          </button>
+        </div>
+
+        <nav className="mobile-sidebar-nav">
+          <Link href="/" onClick={() => setMobileSidebarOpen(false)}>
+            Inicio
+          </Link>
+          <Link href="/#productos" onClick={() => setMobileSidebarOpen(false)}>
+            Catalogo
+          </Link>
+          <Link href="/#instagram" onClick={() => setMobileSidebarOpen(false)}>
+            Instagram
+          </Link>
+          <Link href="/#faq" onClick={() => setMobileSidebarOpen(false)}>
+            FAQ
+          </Link>
+          <Link href="/links" onClick={() => setMobileSidebarOpen(false)}>
+            Links
+          </Link>
+        </nav>
+
+        <div className="mobile-sidebar-categories">
+          <p className="eyebrow">Categorias</p>
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/#${category.slug}`}
+              onClick={() => setMobileSidebarOpen(false)}
+            >
+              {category.name}
+            </Link>
+          ))}
+        </div>
+      </aside>
     </header>
   );
 }

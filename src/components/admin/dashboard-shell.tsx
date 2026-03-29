@@ -616,7 +616,58 @@ export function DashboardShell({
   }
 
   return (
-    <div className="admin-shell admin-shell-polished">
+    <div className="admin-shell admin-shell-polished admin-shell-tn">
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-brand">
+          <p className="eyebrow">Panel privado</p>
+          <strong>Shine admin</strong>
+          <span>Catalogo, contenido y pedidos en una sola vista.</span>
+        </div>
+
+        <nav className="admin-sidebar-nav">
+          <button
+            className={activeTab === "overview" ? "active" : ""}
+            onClick={() => setActiveTab("overview")}
+          >
+            <strong>Resumen</strong>
+            <span>{pendingOrders} pendientes</span>
+          </button>
+          <button
+            className={activeTab === "products" ? "active" : ""}
+            onClick={() => setActiveTab("products")}
+          >
+            <strong>Productos</strong>
+            <span>{products.length} cargados</span>
+          </button>
+          <button
+            className={activeTab === "content" ? "active" : ""}
+            onClick={() => setActiveTab("content")}
+          >
+            <strong>Contenido</strong>
+            <span>{banners.length} banners y {faqList.length} FAQ</span>
+          </button>
+          <button
+            className={activeTab === "orders" ? "active" : ""}
+            onClick={() => setActiveTab("orders")}
+          >
+            <strong>Pedidos</strong>
+            <span>{orders.length} registros</span>
+          </button>
+        </nav>
+
+        <div className="admin-sidebar-meta">
+          <div>
+            <small>Stock bajo</small>
+            <strong>{lowStock.length}</strong>
+          </div>
+          <div>
+            <small>Nuevos ingresos</small>
+            <strong>{newArrivalCount}</strong>
+          </div>
+        </div>
+      </aside>
+
+      <div className="admin-main">
       <section className="admin-hero-panel">
         <div>
           <p className="eyebrow">Panel privado</p>
@@ -632,7 +683,7 @@ export function DashboardShell({
           </button>
           <button className="admin-quick-card" onClick={() => setActiveTab("orders")}>
             <strong>Revisar pedidos</strong>
-            <span>Seguir WhatsApp, Mercado Pago y manuales</span>
+            <span>Seguir WhatsApp y registros manuales</span>
           </button>
           <button className="admin-quick-card" onClick={() => setActiveTab("content")}>
             <strong>Editar contenido</strong>
@@ -749,11 +800,30 @@ export function DashboardShell({
               <textarea name="description" placeholder="Descripcion corta" rows={3} required defaultValue={editingProduct?.description ?? ""} />
               <textarea name="long_description" placeholder="Descripcion larga" rows={4} defaultValue={editingProduct?.longDescription ?? ""} />
               <input name="tags" placeholder="Tags separados por coma" defaultValue={editingProduct?.tags?.join(", ") ?? ""} />
-              <input name="variants" placeholder="Variantes separadas por coma" />
+              <input
+                name="variants"
+                placeholder="Variantes separadas por coma"
+                defaultValue={editingProduct?.variants?.map((variant) => variant.value).join(", ") ?? ""}
+              />
               <label className="file-input">
                 Fotos
                 <input type="file" name="images" multiple accept="image/*" />
               </label>
+              {editingProduct?.images?.length ? (
+                <div className="admin-media-gallery">
+                  {editingProduct.images.map((image, index) => (
+                    <div key={`${image}-${index}`} className="admin-thumb large">
+                      <Image
+                        src={image}
+                        alt={editingProduct.name}
+                        fill
+                        sizes="96px"
+                        className="thumb-photo"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
               <label className="check-input"><input type="checkbox" name="featured" defaultChecked={editingProduct?.featured ?? false} />Destacado</label>
               <label className="check-input"><input type="checkbox" name="new_arrival" defaultChecked={editingProduct?.newArrival ?? false} />Nuevo ingreso</label>
               <label className="check-input"><input type="checkbox" name="best_seller" defaultChecked={editingProduct?.bestSeller ?? false} />Mas vendido</label>
@@ -829,9 +899,27 @@ export function DashboardShell({
               <div className="admin-table compact">
                 {filteredProducts.map((product) => (
                   <div key={product.id} className="admin-row">
-                    <div>
-                      <strong>{product.name}</strong>
-                      <span>{product.categorySlug} - {formatCurrency(product.price)}</span>
+                    <div className="admin-row-with-media">
+                      <div className="admin-thumb">
+                        {product.images?.[0] ? (
+                          <Image
+                            src={product.images[0]}
+                            alt={product.name}
+                            fill
+                            sizes="72px"
+                            className="thumb-photo"
+                          />
+                        ) : (
+                          <div className="admin-thumb-fallback">Sin foto</div>
+                        )}
+                      </div>
+                      <div>
+                        <strong>{product.name}</strong>
+                        <span>{product.categorySlug} - {formatCurrency(product.price)}</span>
+                        {product.variants?.length ? (
+                          <span>{product.variants.length} variantes</span>
+                        ) : null}
+                      </div>
                     </div>
                     <div className="inline-row">
                       <button className="ghost-button" type="button" onClick={() => setEditingProductId(product.id)}>Editar</button>
@@ -976,9 +1064,24 @@ export function DashboardShell({
               <div className="admin-table compact">
                 {filteredBanners.map((banner) => (
                   <div key={banner.id} className="admin-row">
-                    <div>
-                      <strong>{banner.title}</strong>
-                      <span>{banner.ctaLabel}</span>
+                    <div className="admin-row-with-media">
+                      <div className="admin-thumb">
+                        {banner.image ? (
+                          <Image
+                            src={banner.image}
+                            alt={banner.title}
+                            fill
+                            sizes="72px"
+                            className="thumb-photo"
+                          />
+                        ) : (
+                          <div className="admin-thumb-fallback">Sin imagen</div>
+                        )}
+                      </div>
+                      <div>
+                        <strong>{banner.title}</strong>
+                        <span>{banner.ctaLabel}</span>
+                      </div>
                     </div>
                     <div className="inline-row">
                       <button className="ghost-button" type="button" onClick={() => setEditingBannerId(banner.id)}>Editar</button>
@@ -1041,7 +1144,6 @@ export function DashboardShell({
               <select name="channel" defaultValue="manual">
                 <option value="manual">Manual</option>
                 <option value="whatsapp">WhatsApp</option>
-                <option value="mercadopago">Mercado Pago</option>
               </select>
               <select name="status" defaultValue="pending">
                 <option value="pending">Pendiente</option>
@@ -1061,7 +1163,7 @@ export function DashboardShell({
             <div className="admin-section-header">
               <div>
                 <p className="eyebrow">Todos los pedidos</p>
-                <h2>WhatsApp, Mercado Pago y manuales</h2>
+                <h2>WhatsApp y pedidos manuales</h2>
               </div>
             </div>
             <input
@@ -1101,6 +1203,7 @@ export function DashboardShell({
           </div>
         </section>
       ) : null}
+      </div>
     </div>
   );
 }

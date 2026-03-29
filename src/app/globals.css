@@ -3598,3 +3598,253 @@ p {
     width: 100%;
   }
 }
+
+/* Mobile left sidebar for storefront + Tiendanube-like admin shell */
+.mobile-menu-toggle {
+  display: none;
+  padding: 0;
+  background: transparent;
+  font-family: Arial, sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mobile-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+  z-index: 39;
+}
+
+.mobile-sidebar-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: min(88vw, 300px);
+  height: 100vh;
+  padding: 22px 18px;
+  background: #fbf8f4;
+  border-right: 1px solid rgba(223, 216, 209, 0.82);
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  transition: left 0.24s ease;
+  z-index: 40;
+}
+
+.mobile-sidebar.open {
+  left: 0;
+}
+
+.mobile-sidebar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-sidebar-nav,
+.mobile-sidebar-categories {
+  display: grid;
+  gap: 10px;
+}
+
+.mobile-sidebar-nav a,
+.mobile-sidebar-categories a {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(223, 216, 209, 0.7);
+}
+
+.admin-shell-tn {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.admin-main {
+  display: grid;
+  gap: 22px;
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 24px;
+  display: grid;
+  gap: 20px;
+  padding: 22px;
+  border: 1px solid rgba(223, 216, 209, 0.88);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+  border-radius: 28px;
+}
+
+.admin-sidebar-brand {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-sidebar-brand strong {
+  font-size: 1.8rem;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+.admin-sidebar-brand span {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.admin-sidebar-nav {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-sidebar-nav button {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: transparent;
+  border: 1px solid rgba(223, 216, 209, 0.82);
+}
+
+.admin-sidebar-nav button strong {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.admin-sidebar-nav button span,
+.admin-sidebar-meta small {
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+}
+
+.admin-sidebar-nav button.active {
+  background: #111111;
+  color: white;
+  border-color: #111111;
+}
+
+.admin-sidebar-nav button.active span {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.admin-sidebar-meta {
+  display: grid;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(223, 216, 209, 0.82);
+}
+
+.admin-sidebar-meta div {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-sidebar-meta strong {
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.admin-shell-tn .admin-tabs {
+  display: none;
+}
+
+.admin-shell-tn .admin-hero-panel {
+  border-radius: 28px;
+}
+
+.admin-shell-tn .admin-panel-card {
+  border-radius: 24px;
+}
+
+.admin-shell-tn .admin-search {
+  border-radius: 16px;
+}
+
+.admin-shell-tn .admin-table.compact {
+  gap: 14px;
+}
+
+.admin-media-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-thumb.large {
+  width: 96px;
+  height: 96px;
+}
+
+.admin-shell-tn .admin-panel-card {
+  overflow: hidden;
+}
+
+.admin-shell-tn .admin-hero-panel {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
+}
+
+.admin-shell-tn .admin-quick-card {
+  text-align: left;
+}
+
+.admin-shell-tn .inline-row {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.admin-shell-tn .admin-row {
+  gap: 18px;
+}
+
+.admin-shell-tn .admin-row > div:first-child {
+  min-width: 0;
+}
+
+.admin-shell-tn .admin-row strong,
+.admin-shell-tn .admin-row span,
+.admin-shell-tn .admin-row small {
+  word-break: break-word;
+}
+
+@media (max-width: 960px) {
+  .mobile-menu-toggle {
+    display: inline-flex;
+  }
+
+  .store-header .desktop-nav {
+    display: none;
+  }
+
+  .admin-shell-tn {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: static;
+    padding: 18px;
+  }
+
+  .admin-shell-tn .admin-tabs {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .admin-shell-tn .admin-hero-panel {
+    grid-template-columns: 1fr;
+  }
+}
