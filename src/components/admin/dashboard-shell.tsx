@@ -146,8 +146,8 @@ export function DashboardShell({
     );
   }, [contentSearch, couponList]);
 
-  async function uploadImage(file: File) {
-    const path = `products/${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+  async function uploadImage(file: File, folder = "products") {
+    const path = `${folder}/${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
     const bucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || "shine-products";
     const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
     if (error) {
@@ -167,7 +167,7 @@ export function DashboardShell({
       const uploadedFiles = formData.getAll("images") as File[];
       const imageUrls = (
         await Promise.all(
-          uploadedFiles.filter((file) => file.size > 0).map((file) => uploadImage(file))
+          uploadedFiles.filter((file) => file.size > 0).map((file) => uploadImage(file, "products"))
         )
       ).filter(Boolean);
 
@@ -331,13 +331,19 @@ export function DashboardShell({
     setMessage(null);
     const id = String(formData.get("id") || "");
     const name = String(formData.get("name") || "");
+    const categoryImage = formData.get("category_image");
+    const uploadedImage =
+      categoryImage instanceof File && categoryImage.size > 0
+        ? await uploadImage(categoryImage, "categories")
+        : "";
     const payload = {
       name,
       slug: String(formData.get("slug") || slugify(name)),
       description: String(formData.get("description") || ""),
       featured: Boolean(formData.get("featured")),
       sort_order: Number(formData.get("sort_order") || categories.length + 1),
-      link_label: String(formData.get("link_label") || "Ver todo")
+      link_label: String(formData.get("link_label") || "Ver todo"),
+      ...(uploadedImage ? { image_url: uploadedImage } : {})
     };
 
     const query = id
@@ -487,6 +493,11 @@ export function DashboardShell({
 
   async function saveBanner(formData: FormData) {
     const id = String(formData.get("id") || "");
+    const bannerImage = formData.get("banner_image");
+    const uploadedImage =
+      bannerImage instanceof File && bannerImage.size > 0
+        ? await uploadImage(bannerImage, "banners")
+        : "";
     const payload = {
       title: String(formData.get("title") || ""),
       subtitle: String(formData.get("subtitle") || ""),
@@ -494,7 +505,8 @@ export function DashboardShell({
       cta_href: String(formData.get("cta_href") || "#productos"),
       secondary_label: String(formData.get("secondary_label") || ""),
       secondary_href: String(formData.get("secondary_href") || "#instagram"),
-      active: true
+      active: true,
+      ...(uploadedImage ? { image_url: uploadedImage } : {})
     };
     const query = id
       ? supabase.from("home_banners").update(payload).eq("id", id).select().single()
@@ -766,6 +778,18 @@ export function DashboardShell({
                 <input name="link_label" placeholder="Texto del link" defaultValue={editingCategory?.linkLabel ?? ""} />
                 <input name="sort_order" placeholder="Orden" type="number" defaultValue={editingCategory?.sortOrder ?? ""} />
                 <textarea name="description" placeholder="Descripcion" rows={3} defaultValue={editingCategory?.description ?? ""} />
+                <label className="file-input">
+                  Foto de categoria
+                  <input type="file" name="category_image" accept="image/*" />
+                </label>
+                {editingCategory?.image ? (
+                  <div className="admin-media-preview">
+                    <span>Imagen actual</span>
+                    <a href={editingCategory.image} target="_blank" rel="noreferrer">
+                      Ver foto cargada
+                    </a>
+                  </div>
+                ) : null}
                 <label className="check-input"><input type="checkbox" name="featured" defaultChecked={editingCategory?.featured ?? false} />Mostrar destacada</label>
               </div>
               <button className="button-primary" disabled={saving === "category"}>
@@ -862,6 +886,18 @@ export function DashboardShell({
                 <input name="cta_href" placeholder="#productos" required defaultValue={editingBanner?.ctaHref ?? ""} />
                 <input name="secondary_label" placeholder="CTA secundario" defaultValue={editingBanner?.secondaryLabel ?? ""} />
                 <input name="secondary_href" placeholder="#instagram" defaultValue={editingBanner?.secondaryHref ?? ""} />
+                <label className="file-input">
+                  Imagen de banner
+                  <input type="file" name="banner_image" accept="image/*" />
+                </label>
+                {editingBanner?.image ? (
+                  <div className="admin-media-preview">
+                    <span>Imagen actual</span>
+                    <a href={editingBanner.image} target="_blank" rel="noreferrer">
+                      Ver banner cargado
+                    </a>
+                  </div>
+                ) : null}
               </div>
               <button className="button-primary">{editingBanner ? "Actualizar banner" : "Agregar banner"}</button>
             </form>

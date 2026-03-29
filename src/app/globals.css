@@ -1135,6 +1135,39 @@ p {
   letter-spacing: 0.06em;
 }
 
+.admin-media-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: rgba(17, 17, 17, 0.03);
+  font-family: Arial, sans-serif;
+}
+
+.admin-media-preview span {
+  color: var(--muted);
+}
+
+.admin-media-preview a {
+  font-weight: 700;
+}
+
+.admin-panel-card h2 {
+  margin-bottom: 0;
+}
+
+.admin-form-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 244, 239, 0.96));
+}
+
+.admin-table.compact .admin-row {
+  align-items: flex-start;
+}
+
 .admin-table.compact {
   padding: 8px 20px;
 }
