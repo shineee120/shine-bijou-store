@@ -30,6 +30,7 @@ export async function POST(request: Request) {
   const body = await request.json();
   const postalCode = String(body.postalCode || "");
   const weightGrams = Number(body.weightGrams || 0);
+  const deliveryType = body.deliveryType === "S" ? "S" : "D";
 
   if (!postalCode) {
     return NextResponse.json({ error: "Falta codigo postal." }, { status: 400 });
@@ -38,18 +39,32 @@ export async function POST(request: Request) {
   const baseUrl = process.env.CORREO_ARGENTINO_BASE_URL;
   const customerId = process.env.CORREO_ARGENTINO_CUSTOMER_ID;
   const originPostalCode = process.env.CORREO_ARGENTINO_ORIGIN_POSTAL_CODE;
+  const hasSomeCorreoConfig = Boolean(
+    baseUrl ||
+      customerId ||
+      originPostalCode ||
+      process.env.CORREO_ARGENTINO_BASIC_USER ||
+      process.env.CORREO_ARGENTINO_BASIC_PASSWORD
+  );
 
-  if (!baseUrl || !customerId || !originPostalCode) {
+  if (!hasSomeCorreoConfig) {
     const price = estimateMockShipping(postalCode, weightGrams);
     return NextResponse.json({
       quote: {
         serviceName: "Correo Argentino (estimado demo)",
-        deliveredType: "D",
+        deliveredType: deliveryType,
         price,
         deliveryTimeMin: "3",
         deliveryTimeMax: "6"
       }
     });
+  }
+
+  if (!baseUrl || !customerId || !originPostalCode) {
+    return NextResponse.json(
+      { error: "Faltan variables de Correo Argentino para cotizar en modo real." },
+      { status: 500 }
+    );
   }
 
   try {
@@ -69,7 +84,7 @@ export async function POST(request: Request) {
         originZipCode: originPostalCode,
         destinationZipCode: postalCode,
         packageWeight: Math.max(weightGrams / 1000, 0.1),
-        deliveredType: "D"
+        deliveredType: deliveryType
       }),
       cache: "no-store"
     });
@@ -85,7 +100,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       quote: {
         serviceName: firstRate?.productName ?? "Correo Argentino",
-        deliveredType: firstRate?.deliveredType ?? "D",
+        deliveredType: firstRate?.deliveredType ?? deliveryType,
         price: Number(firstRate?.price ?? firstRate?.total ?? 0),
         deliveryTimeMin: firstRate?.deliveryTimeMin ?? firstRate?.minDeliveryTime ?? "",
         deliveryTimeMax: firstRate?.deliveryTimeMax ?? firstRate?.maxDeliveryTime ?? ""

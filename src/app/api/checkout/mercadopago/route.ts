@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import MercadoPagoConfig, { Preference } from "mercadopago";
 import { createAdminClient } from "@/lib/supabase/server";
+import { siteConfig } from "@/lib/site-config";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -21,6 +22,8 @@ export async function POST(request: Request) {
     customer && typeof customer === "string" ? JSON.parse(customer) : {};
   const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const shipping = Number(customerData?.shippingQuote?.price ?? 0);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || siteConfig.siteUrl;
+  let checkoutOrderId: string | null = null;
 
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -28,7 +31,9 @@ export async function POST(request: Request) {
   ) {
     try {
       const supabase = createAdminClient();
-      await supabase.from("checkout_orders").insert({
+      const { data } = await supabase
+        .from("checkout_orders")
+        .insert({
         customer_name: customerData.fullName ?? null,
         customer_email: customerData.email ?? null,
         channel: "mercadopago",
@@ -37,7 +42,11 @@ export async function POST(request: Request) {
         items,
         shipping_data: customerData.shippingQuote ?? null,
         customer_data: customerData
-      });
+        })
+        .select("id")
+        .single();
+
+      checkoutOrderId = data?.id ?? null;
     } catch {
       // Order persistence should not block checkout.
     }
@@ -85,14 +94,21 @@ export async function POST(request: Request) {
         name: customerData.fullName,
         email: customerData.email
       },
-      back_urls: {
-        success: `${process.env.NEXT_PUBLIC_SITE_URL}/?status=success`,
-        failure: `${process.env.NEXT_PUBLIC_SITE_URL}/?status=failure`,
-        pending: `${process.env.NEXT_PUBLIC_SITE_URL}/?status=pending`
+      external_reference: checkoutOrderId ?? undefined,
+      metadata: {
+        checkout_order_id: checkoutOrderId ?? "",
+        customer_email: customerData.email ?? "",
+        channel: "mercadopago"
       },
+      back_urls: {
+        success: `${siteUrl}/?status=success`,
+        failure: `${siteUrl}/?status=failure`,
+        pending: `${siteUrl}/?status=pending`
+      },
+      notification_url: `${siteUrl}/api/checkout/mercadopago/webhook`,
       auto_return: "approved"
     }
   });
 
-  return NextResponse.redirect(result.init_point ?? process.env.NEXT_PUBLIC_SITE_URL ?? "/");
+  return NextResponse.redirect(result.init_point ?? siteUrl ?? "/");
 }

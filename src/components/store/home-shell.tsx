@@ -42,8 +42,6 @@ function ProductVisual({ product }: { product: Product }) {
 
   return (
     <div className="visual-fallback product-visual-fallback">
-      <small>{product.categorySlug}</small>
-      <strong>{product.name}</strong>
       <span>Shine selection</span>
     </div>
   );
@@ -64,8 +62,7 @@ function CategoryVisual({ category }: { category: ProductCategory }) {
 
   return (
     <div className="visual-fallback category-visual-fallback">
-      <small>{category.slug}</small>
-      <strong>{category.name}</strong>
+      <span>Categoria Shine</span>
     </div>
   );
 }

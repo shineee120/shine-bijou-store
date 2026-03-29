@@ -29,6 +29,7 @@ export function createWhatsAppMessage(input: {
     fullName?: string;
     postalCode?: string;
     address?: string;
+    deliveryType?: string;
     notes?: string;
   };
 }) {
@@ -42,6 +43,11 @@ export function createWhatsAppMessage(input: {
         input.customer.fullName ? `Nombre: ${input.customer.fullName}` : "",
         input.customer.postalCode ? `CP: ${input.customer.postalCode}` : "",
         input.customer.address ? `Direccion: ${input.customer.address}` : "",
+        input.customer.deliveryType
+          ? `Entrega: ${
+              input.customer.deliveryType === "S" ? "Sucursal" : "Domicilio"
+            }`
+          : "",
         input.customer.notes ? `Notas: ${input.customer.notes}` : ""
       ].filter(Boolean)
     : [];

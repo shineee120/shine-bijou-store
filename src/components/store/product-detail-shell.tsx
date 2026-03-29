@@ -23,8 +23,6 @@ function ProductGallery({ product, selectedImage }: { product: Product; selected
 
   return (
     <div className="visual-fallback detail-visual-fallback">
-      <small>{product.categorySlug}</small>
-      <strong>{product.name}</strong>
       <span>Producto listo para foto real</span>
     </div>
   );
@@ -91,7 +89,7 @@ export function ProductDetailShell({
                 >
                   {image === "placeholder" ? (
                     <div className="visual-fallback thumb-visual-fallback">
-                      <strong>{product.name}</strong>
+                      <span>Vista previa</span>
                     </div>
                   ) : (
                     <Image

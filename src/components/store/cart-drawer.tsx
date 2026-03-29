@@ -15,6 +15,7 @@ export function CartDrawer() {
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [shippingPostalCode, setShippingPostalCode] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingDeliveryType, setShippingDeliveryType] = useState<"D" | "S">("D");
   const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null);
   const [shippingMessage, setShippingMessage] = useState("");
   const [fullName, setFullName] = useState("");
@@ -52,6 +53,7 @@ export function CartDrawer() {
         fullName,
         postalCode: shippingPostalCode,
         address: shippingAddress,
+        deliveryType: shippingDeliveryType,
         notes
       }
     })
@@ -69,6 +71,7 @@ export function CartDrawer() {
       body: JSON.stringify({
         postalCode: shippingPostalCode,
         address: shippingAddress,
+        deliveryType: shippingDeliveryType,
         weightGrams
       })
     });
@@ -82,7 +85,11 @@ export function CartDrawer() {
 
     setShippingQuote(data.quote);
     setShippingMessage(
-      `${data.quote.serviceName} - ${formatCurrency(data.quote.price)}`
+      `${data.quote.serviceName} - ${formatCurrency(data.quote.price)}${
+        data.quote.deliveryTimeMin && data.quote.deliveryTimeMax
+          ? ` - ${data.quote.deliveryTimeMin} a ${data.quote.deliveryTimeMax} dias`
+          : ""
+      }`
     );
   }
 
@@ -168,6 +175,15 @@ export function CartDrawer() {
                 value={shippingAddress}
                 onChange={(event) => setShippingAddress(event.target.value)}
               />
+              <select
+                value={shippingDeliveryType}
+                onChange={(event) =>
+                  setShippingDeliveryType(event.target.value === "S" ? "S" : "D")
+                }
+              >
+                <option value="D">Entrega a domicilio</option>
+                <option value="S">Retiro en sucursal</option>
+              </select>
               <textarea
                 placeholder="Notas del pedido"
                 rows={3}
@@ -223,6 +239,7 @@ export function CartDrawer() {
               phone,
               postalCode: shippingPostalCode,
               address: shippingAddress,
+              deliveryType: shippingDeliveryType,
               notes,
               couponCode: appliedCoupon?.code ?? "",
               shippingQuote

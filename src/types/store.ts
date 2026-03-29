@@ -73,7 +73,16 @@ export type AdminTaskOrder = {
   id: string;
   clientName: string;
   channel: "whatsapp" | "manual" | "mercadopago";
-  status: "pending" | "paid" | "preparing" | "delivered";
+  status:
+    | "pending"
+    | "paid"
+    | "preparing"
+    | "delivered"
+    | "approved"
+    | "rejected"
+    | "in_process"
+    | "cancelled"
+    | "refunded";
   total: number;
   notes?: string;
   createdAt: string;

@@ -66,8 +66,7 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
                   />
                 ) : (
                   <div className="visual-fallback mega-visual-fallback">
-                    <small>{category.slug}</small>
-                    <strong>{category.name}</strong>
+                    <span>Categoria Shine</span>
                   </div>
                 )}
               </div>
