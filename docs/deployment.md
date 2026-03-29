@@ -45,6 +45,12 @@ Copiá las variables de [`.env.example`](C:\Users\WinterOS\Documents\New project
 2. Copiar Access Token de produccion.
 3. Cargarlo en `MERCADOPAGO_ACCESS_TOKEN`.
 4. Configurar `NEXT_PUBLIC_SITE_URL` con tu dominio final.
+5. Configurar en Mercado Pago la URL de webhook apuntando a:
+   `https://tu-dominio.com/api/checkout/mercadopago/webhook`
+6. Si Mercado Pago te da una clave de firma para webhooks, cargarla en `MERCADOPAGO_WEBHOOK_SECRET`.
+
+La app crea una orden interna en `checkout_orders`, manda `external_reference` a Mercado Pago
+y luego actualiza el estado cuando llega el webhook del pago.
 
 ## Correo Argentino
 
@@ -53,6 +59,8 @@ Copiá las variables de [`.env.example`](C:\Users\WinterOS\Documents\New project
 3. Cargar tu `CORREO_ARGENTINO_CUSTOMER_ID`.
 4. Cargar el codigo postal de origen en `CORREO_ARGENTINO_ORIGIN_POSTAL_CODE`.
 5. Si estas en testing, podes cambiar `CORREO_ARGENTINO_BASE_URL`.
+6. Si no configuras nada, la tienda usa un estimado demo.
+7. Si configuras solo una parte de las variables, la API devuelve error para evitar cotizaciones engañosas.
 
 ## GitHub y Vercel
 
