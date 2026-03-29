@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container store-footer-grid">
         <div>
           <p className="eyebrow">Shine Bijou</p>
-          <strong>{siteConfig.shortName}</strong>
+          <strong className="store-wordmark">{siteConfig.shortName}</strong>
           <p>Accesorios, joyeria y regalos para todos los dias.</p>
         </div>
         <div className="footer-links">

@@ -162,11 +162,18 @@ p {
   gap: 2px;
 }
 
-.store-brand-block span {
+.store-wordmark {
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.store-brand-tag {
   color: var(--muted);
   font-family: Arial, sans-serif;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
@@ -2061,8 +2068,8 @@ p {
 .store-hero-copy {
   display: grid;
   align-content: space-between;
-  gap: 28px;
-  min-height: 520px;
+  gap: 24px;
+  min-height: 420px;
   padding: 48px;
   background:
     radial-gradient(circle at top left, rgba(245, 235, 224, 0.9), transparent 42%),
@@ -2087,6 +2094,7 @@ p {
 }
 
 .store-hero-actions,
+.store-hero-points,
 .store-hero-switches,
 .store-filter-row,
 .store-editorial-points,
@@ -2111,6 +2119,15 @@ p {
   background: var(--accent);
   color: white;
   border-color: var(--accent);
+}
+
+.store-hero-points span {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(223, 216, 209, 0.9);
+  background: rgba(255, 255, 255, 0.82);
+  font-family: Arial, sans-serif;
+  font-size: 0.8rem;
 }
 
 .store-hero-aside {
@@ -2216,12 +2233,14 @@ p {
 
 .store-category-grid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
 }
 
 .store-category-card {
   display: grid;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .store-category-media,
@@ -2231,14 +2250,15 @@ p {
 }
 
 .store-category-media {
-  min-height: 250px;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
   background: #f7f1ea;
 }
 
 .store-category-copy {
   display: grid;
-  gap: 10px;
-  padding: 22px;
+  gap: 8px;
+  padding: 18px 18px 20px;
 }
 
 .store-category-copy p,
@@ -2253,9 +2273,9 @@ p {
 }
 
 .store-category-copy strong {
-  margin-top: 4px;
+  margin-top: 2px;
   font-family: Arial, sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -2681,9 +2701,9 @@ p {
     padding-top: 32px;
   }
 
-  .store-hero-copy,
-  .store-hero-aside {
+  .store-hero-copy {
     min-height: auto;
+    padding: 32px 24px;
   }
 
   .admin-inline-actions {

@@ -15,10 +15,10 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
     <header className="site-header store-header">
       <div className="container header-row">
         <div className="store-brand-block">
-          <Link href="/" className="brand">
+          <Link href="/" className="brand store-wordmark">
             {siteConfig.shortName}
           </Link>
-          <span>Bijou & accesorios</span>
+          <span className="store-brand-tag">bijou & accesorios</span>
         </div>
 
         <nav className="desktop-nav">

@@ -139,18 +139,25 @@ function HeroSection({ banners }: { banners: HeroBanner[] }) {
               </Link>
             ) : null}
           </div>
-          <div className="store-hero-switches">
-            {banners.map((entry, currentIndex) => (
-              <button
-                key={entry.id}
-                type="button"
-                className={currentIndex === index ? "active" : ""}
-                onClick={() => setIndex(currentIndex)}
-              >
-                0{currentIndex + 1}
-              </button>
-            ))}
+          <div className="store-hero-points">
+            <span>Mercado Pago</span>
+            <span>WhatsApp</span>
+            <span>Envios a todo el pais</span>
           </div>
+          {banners.length > 1 ? (
+            <div className="store-hero-switches">
+              {banners.map((entry, currentIndex) => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className={currentIndex === index ? "active" : ""}
+                  onClick={() => setIndex(currentIndex)}
+                >
+                  0{currentIndex + 1}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
 
       </div>
@@ -162,15 +169,11 @@ function CategorySection({ categories }: { categories: ProductCategory[] }) {
   return (
     <section className="section store-section-shell">
       <div className="container">
-        <div className="store-section-heading">
+        <div className="store-section-heading compact">
           <div>
             <p className="eyebrow">Categorias</p>
-            <h2>Una tienda simple para navegar, elegir y combinar</h2>
+            <h2>Explora por categoria</h2>
           </div>
-          <p className="store-section-copy">
-            Cada categoria esta pensada para entrar rapido desde la home, desde `/links`
-            o desde WhatsApp.
-          </p>
         </div>
         <div className="store-category-grid">
           {categories.map((category) => (
@@ -185,52 +188,6 @@ function CategorySection({ categories }: { categories: ProductCategory[] }) {
               </div>
             </Link>
           ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function EditorialSection({ products }: { products: Product[] }) {
-  const featured = products.filter((product) => product.featured).slice(0, 4);
-  const arrivals = products.filter((product) => product.newArrival).slice(0, 4);
-
-  return (
-    <section className="section store-editorial-band">
-      <div className="container store-editorial-grid">
-        <div className="store-editorial-copy">
-          <p className="eyebrow">Seleccion Shine</p>
-          <h2>Joyeria y accesorios para regalar, combinar y volver a usar</h2>
-          <p>
-            Una curaduria de piezas faciles de comprar, faciles de recomendar y faciles
-            de sumar al carrito.
-          </p>
-          <div className="store-editorial-points">
-            <span>Mercado Pago</span>
-            <span>WhatsApp</span>
-            <span>Envios</span>
-          </div>
-        </div>
-
-        <div className="store-editorial-lists">
-          <div className="store-mini-panel">
-            <p className="eyebrow">Destacados</p>
-            {featured.map((product) => (
-              <Link key={product.id} href={`/products/${product.slug}`} className="store-mini-row">
-                <span>{product.name}</span>
-                <small>{formatCurrency(product.price)}</small>
-              </Link>
-            ))}
-          </div>
-          <div className="store-mini-panel" id="nuevos">
-            <p className="eyebrow">Nuevos ingresos</p>
-            {arrivals.map((product) => (
-              <Link key={product.id} href={`/products/${product.slug}`} className="store-mini-row">
-                <span>{product.name}</span>
-                <small>{formatCurrency(product.price)}</small>
-              </Link>
-            ))}
-          </div>
         </div>
       </div>
     </section>
@@ -407,27 +364,6 @@ function FAQSection({ items }: { items: FAQItem[] }) {
   );
 }
 
-function CouponSection({ coupons }: { coupons: Coupon[] }) {
-  const activeCoupons = coupons.filter((coupon) => coupon.active);
-
-  if (!activeCoupons.length) {
-    return null;
-  }
-
-  return (
-    <section className="section store-coupon-section">
-      <div className="container store-coupon-grid">
-        {activeCoupons.map((coupon) => (
-          <article key={coupon.id} className="store-coupon-card">
-            <span>{coupon.code}</span>
-            <p>{coupon.description}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function FinalCTA() {
   return (
     <section className="section store-final-cta">
@@ -452,22 +388,20 @@ function FinalCTA() {
 export function HomeShell({
   banners,
   categories,
-  coupons,
+  coupons: _coupons,
   faqItems,
   products
 }: {
   banners: HeroBanner[];
   categories: ProductCategory[];
-  coupons: Coupon[];
+  coupons?: Coupon[];
   faqItems: FAQItem[];
   products: Product[];
 }) {
   return (
     <>
       <HeroSection banners={banners} />
-      <CouponSection coupons={coupons} />
       <CategorySection categories={categories} />
-      <EditorialSection products={products} />
       <CatalogSection categories={categories} products={products} />
       <TrustSection />
       <SocialSection products={products} />
