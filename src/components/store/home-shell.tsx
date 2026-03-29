@@ -139,11 +139,6 @@ function HeroSection({ banners }: { banners: HeroBanner[] }) {
               </Link>
             ) : null}
           </div>
-          <div className="store-hero-points">
-            <span>Mercado Pago</span>
-            <span>WhatsApp</span>
-            <span>Envios a todo el pais</span>
-          </div>
           {banners.length > 1 ? (
             <div className="store-hero-switches">
               {banners.map((entry, currentIndex) => (
@@ -159,7 +154,20 @@ function HeroSection({ banners }: { banners: HeroBanner[] }) {
             </div>
           ) : null}
         </div>
-
+        <div className="store-hero-visual">
+          {banner.image ? (
+            <Image
+              src={banner.image}
+              alt={banner.title}
+              fill
+              priority
+              sizes="(max-width: 960px) 100vw, 50vw"
+              className="store-hero-image"
+            />
+          ) : (
+            <div className="store-visual-fallback" aria-hidden="true" />
+          )}
+        </div>
       </div>
     </section>
   );
@@ -183,8 +191,6 @@ function CategorySection({ categories }: { categories: ProductCategory[] }) {
               </div>
               <div className="store-category-copy">
                 <h3>{category.name}</h3>
-                <p>{category.description}</p>
-                <strong>{category.linkLabel ?? "Ver todo"}</strong>
               </div>
             </Link>
           ))}
@@ -269,15 +275,15 @@ function TrustSection() {
   const items = [
     {
       title: "Compra simple",
-      copy: "Carrito persistente, pedido por WhatsApp y pago online."
+      copy: "Mercado Pago, WhatsApp y carrito siempre disponible."
     },
     {
       title: "Envios y retiro",
       copy: "Calcula envio con tu codigo postal y coordina tu entrega."
     },
     {
-      title: "Regalos y sets",
-      copy: "La tienda esta pensada para elegir facil y regalar mejor."
+      title: "Piezas para todos los dias",
+      copy: "Aros, collares, pulseras y conjuntos para combinar facil."
     }
   ];
 
@@ -302,6 +308,7 @@ function SocialSection({ products }: { products: Product[] }) {
       productName: product.name
     }))
   );
+  const gallery = products.filter((product) => product.images[0]).slice(0, 3);
 
   return (
     <section className="section store-social-shell">
@@ -310,16 +317,29 @@ function SocialSection({ products }: { products: Product[] }) {
           <div className="store-section-heading compact">
             <div>
               <p className="eyebrow">Instagram</p>
-              <h2>Lookbook, novedades y favoritos del momento</h2>
+              <h2>Una tienda limpia, femenina y facil de compartir</h2>
             </div>
             <Link href={siteConfig.instagramUrl} className="button-secondary">
               Abrir perfil
             </Link>
           </div>
           <div className="store-instagram-grid" id="instagram">
-            <div className="store-instagram-tile large">Drop semanal</div>
-            <div className="store-instagram-tile">Aros y collares</div>
-            <div className="store-instagram-tile">Regalos</div>
+            {gallery.map((product, index) => (
+              <Link
+                key={product.id}
+                href={`/products/${product.slug}`}
+                className={`store-instagram-tile ${index === 0 ? "large" : ""}`}
+              >
+                <Image
+                  src={product.images[0]}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 960px) 100vw, 33vw"
+                  className="store-gallery-image"
+                />
+                <span>{product.name}</span>
+              </Link>
+            ))}
           </div>
         </div>
 
@@ -370,7 +390,7 @@ function FinalCTA() {
       <div className="container store-final-cta-grid">
         <div>
           <p className="eyebrow">Shine</p>
-          <h2>Elegir, comprar y compartir la tienda deberia sentirse facil</h2>
+          <h2>Accesorios para todos los dias, con una experiencia simple y linda</h2>
         </div>
         <div className="store-final-actions">
           <Link href="#productos" className="button-primary">
@@ -402,8 +422,8 @@ export function HomeShell({
     <>
       <HeroSection banners={banners} />
       <CategorySection categories={categories} />
-      <CatalogSection categories={categories} products={products} />
       <TrustSection />
+      <CatalogSection categories={categories} products={products} />
       <SocialSection products={products} />
       <FAQSection items={faqItems} />
       <FinalCTA />
