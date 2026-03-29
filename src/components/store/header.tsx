@@ -12,11 +12,14 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
   const { items, openCart } = useCart();
 
   return (
-    <header className="site-header">
+    <header className="site-header store-header">
       <div className="container header-row">
-        <Link href="/" className="brand">
-          {siteConfig.shortName}
-        </Link>
+        <div className="store-brand-block">
+          <Link href="/" className="brand">
+            {siteConfig.shortName}
+          </Link>
+          <span>Bijou & accesorios</span>
+        </div>
 
         <nav className="desktop-nav">
           <Link href="/">Inicio</Link>
@@ -33,7 +36,7 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
         </nav>
 
         <div className="header-actions">
-          <button className="cart-button" onClick={openCart}>
+          <button className="cart-button store-cart-button" onClick={openCart}>
             Carrito <span>{items.reduce((acc, item) => acc + item.quantity, 0)}</span>
           </button>
         </div>
@@ -65,9 +68,7 @@ export function Header({ categories }: { categories: ProductCategory[] }) {
                     className="mega-image"
                   />
                 ) : (
-                  <div className="visual-fallback mega-visual-fallback">
-                    <span>Categoria Shine</span>
-                  </div>
+                  <div className="visual-fallback mega-visual-fallback" aria-hidden="true" />
                 )}
               </div>
               <p>{category.name}</p>
